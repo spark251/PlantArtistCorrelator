@@ -1,8 +1,13 @@
 import urllib2
+import urllib
+import sys
 import re
 from bs4 import BeautifulSoup # To get everything
 
-url = "http://www.google.com/search?q=query"
+# Get the HTML from the search
+query = { 'q' : sys.argv[1]}
+url = "http://www.google.com/search?" + urllib.urlencode(query)
+print "Search Query: " + url
 req = urllib2.Request(url, headers={'User-Agent' : "Magic Browser"})
 response = urllib2.urlopen(req)
 html = response.read()
@@ -13,4 +18,4 @@ num = soup.find_all(attrs={'id' : 'resultStats'})[0] # Find the element with id=
 num_string = "" + str(num) # Make it a string
 num_string = re.sub("[^0-9]", "", num_string) # Take out everything except numbers
 num_final = int(num_string) # Convert to an int
-print num_final
+print "Number of Results: " + str(num_final)
