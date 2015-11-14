@@ -1,21 +1,27 @@
-import urllib2
+
 import urllib
 import sys
 import re
-from bs4 import BeautifulSoup # To get everything
+from lxml import html
 
 # Remove the html tags
 def remove_tags(text):
     return re.sub('<[^>]*>', '', text)
 
-# Read the links file into string
-html = ""
-with open ("links.html", "r") as myfile:
-    html=myfile.read().replace('\n', '')
+with open('artists.csv', 'w') as fp:
+    # Read the links file into string
+    txt = ""
+    with open ("links.html", "r") as myfile:
+        txt=myfile.read().replace('\n', '')
 
-soup = BeautifulSoup(html, "html.parser")
-results = soup.findAll('a') # Find all 'a' tags
+    tree = html.fromstring(txt)
+    first_names = tree.xpath('//a')
+    first_names_array = []
+    first_names_array = first_names
 
-# For each result remove the html tags and print them out
-for result in results:
-    print remove_tags(str(result)).lstrip()
+
+    for x in range(0, len(first_names_array)) :
+        if isinstance(first_names_array[x].text, basestring) :
+            fp.write(str(first_names_array[x].text + first_names_array[x].find('b').text).strip()+",\n")
+        else:
+            fp.write(str(first_names_array[x].find('b').text).strip()+",\n")
