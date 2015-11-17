@@ -9,8 +9,16 @@ import json
 
 ARTISTS_LIST = "artists.csv"
 
+def showHelp() :
+    print("usage: python3 webpage_search.py <url>")
+
 # Open the url as flowerHTML
 try:
+    try :
+        url = sys.argv[1]
+    except IndexError :
+        showHelp()
+        exit()
     html = urllib.request.urlopen(sys.argv[1]).read()
     soup = BeautifulSoup(html, "html.parser")
     texts = soup.findAll(text=True)
