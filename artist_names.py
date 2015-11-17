@@ -21,7 +21,7 @@ with open('artists.csv', 'w') as fp:
 
 
     for x in range(0, len(first_names_array)) :
-        if isinstance(first_names_array[x].text, basestring) :
+        if isinstance(first_names_array[x].text, str) :
             fp.write(str(first_names_array[x].text + first_names_array[x].find('b').text).strip()+",\n")
         else:
             fp.write(str(first_names_array[x].find('b').text).strip()+",\n")
