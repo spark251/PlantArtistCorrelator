@@ -26,10 +26,12 @@ except FileNotFoundError :
 
 for plant in plants :
     query = plant + " art artist painting"
+    print("Searching: ", plant)
 
-    url1 = search.getUrls(query, "google", verbose=False)
+    #url1 = search.getUrls(query, "google", verbose=False)
     url2 = search.getUrls(query, "duckduckgo", verbose=False)
-
+    url1 = []
+    
     in_first = set(url1)
     in_second = set(url2)
     in_second_but_not_in_first = in_second - in_first
@@ -43,7 +45,7 @@ for plant in plants :
     ## Open each url and add to one string HTMLOfPages
     HTMLOfPages = ""
     for url in urls :
-        html = search.getPageText(url, verbose=False, timeout=3)
+        html = search.getPageText(url, verbose=True, timeout=.3)
         HTMLOfPages += html
 
     # There is an artist named "Erro" and he get's matched for every single
@@ -60,6 +62,6 @@ for plant in plants :
     for index, artist in enumerate(artists, start=0):
         count = HTMLOfPages.count(artist.lower())
         counter.append(count)
-    #print(len(counter))
 
-    search.printOccurrences(counter, artists)
+    #search.printOccurrences(counter, artists)
+    search.resultsToCsv(counter, artists, plant, RESULTS_CSV)

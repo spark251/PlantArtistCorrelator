@@ -90,22 +90,32 @@ def printOccurrences(counter, artists) :
                         #print("Index: ", x)
 
 def resultsToCsv(counter, artists, plant_string, results_csv) :
+    # Open the results_csv file
+    try:
+        results_file = open(results_csv, 'a')
+    except FileNotFoundError :
+        print("The plants file is not found. Quitting...")
+        exit()
+
+    # Format the data
+    results = [plant_string]
+
     ## The maximum number of occurrences of any given name
     maxOccurrences = max(counter)
     if maxOccurrences is 0 :
-        print("No results");
+        results.append("No results");
     else :
         ## Print out all the artists that matched the search
         for occurrences in reversed(range(1, maxOccurrences + 1)) :
             # Index of counter array with the max value
-            theIndex = [i for i, x in enumerate(counter) if x == occurrences]
+            theIndexes = [i for i, x in enumerate(counter) if x == occurrences]
+            if len(theIndexes) != 0 :
+                for x in theIndexes :
+                    results.append(artists[x] + " (" + str(occurrences) + ")")
 
-            # Print out the results
-            if occurrences == 0 :
-                print("No results");
-            else :
-                if len(theIndex) != 0 :
-                    print("Occurrences: ", occurrences)
-                    for x in theIndex :
-                        print(" - Artist: ", artists[x])
-                        #print("Index: ", x)
+    # Write data to file in a new row in csv format
+    resultString = ""
+    for result in results :
+        resultString += result + ", "
+
+    results_file.write(resultString + "\n")
