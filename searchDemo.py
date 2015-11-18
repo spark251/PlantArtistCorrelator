@@ -72,8 +72,6 @@ if __name__ == '__main__':
     pattern = re.compile("error", re.IGNORECASE)
     HTMLOfPages = pattern.sub("", HTMLOfPages.lower())
 
-
-
     ## For each artist, count the number of occurrences that artist has in the
     ## file and add it to an array (counter) with it's index corresponding to
     ## the index of that artist
@@ -83,28 +81,10 @@ if __name__ == '__main__':
         count = HTMLOfPages.count(artist.lower())
         counter.append(count)
     #print(len(counter))
-    ## The maximum number of occurrences of any given name
-    maxOccurrences = max(counter)
+
 
     # Remove "Loading..."
     if args.verbose is False :
         sys.stdout.write("\r")
 
-
-    if maxOccurrences is 0 :
-        print("No results");
-    else :
-        ## Print out all the artists that matched the search
-        for occurrences in reversed(range(1, maxOccurrences + 1)) :
-            # Index of counter array with the max value
-            theIndex = [i for i, x in enumerate(counter) if x == occurrences]
-
-            # Print out the results
-            if occurrences == 0 :
-                print("No results");
-            else :
-                if len(theIndex) != 0 :
-                    print("Occurrences: ", occurrences)
-                    for x in theIndex :
-                        print(" - Artist: ", artists[x])
-                        #print("Index: ", x)
+    search.printOccurrences(counter, artists)
