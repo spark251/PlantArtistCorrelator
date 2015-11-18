@@ -1,5 +1,7 @@
 import json, urllib, sys, re, socket, csv, time, argparse, http, search
 
+startTime = time.time()
+
 ARTISTS_CSV = "artists.csv"
 RESULTS_CSV = "result.csv"
 PLANTS_CSV = "plants.csv"
@@ -14,29 +16,39 @@ except FileNotFoundError :
     print("The plants file is not found. Quitting...")
     exit()
 
+artists = []
 try:
     reader = csv.reader(open(ARTISTS_CSV, 'r'))
     tempArtists = list(reader)
-    artists = []
     for artist in tempArtists:
         artists.append(artist[0])
 except FileNotFoundError :
     print("The artists file is not found. Quitting...")
     exit()
 
-for plant in plants :
-    query = plant + " art artist painting"
-    print("Searching: ", plant)
+try:
+    results_file = open(RESULTS_CSV, 'w')
+    results_file.write("Plants, Artists (Ranking: higher = better), \n")
+except FileNotFoundError :
+    print("The results file is not found. Quitting...")
+    exit()
 
-    #url1 = search.getUrls(query, "google", verbose=False)
-    url2 = search.getUrls(query, "duckduckgo", verbose=False)
-    url1 = []
-    
+for index, plant in enumerate(plants) :
+    plantStartTime = time.time()
+
+    query = plant + " art artist painting"
+    print(index+1, "out of", len(plants), ":", plant)
+
+    url1 = search.getUrls(query, "google", verbose=True)
+    #url1=[]
+    url2 = search.getUrls(query, "duckduckgo", verbose=True)
+
     in_first = set(url1)
     in_second = set(url2)
     in_second_but_not_in_first = in_second - in_first
 
     urls = url1 + list(in_second_but_not_in_first)
+    #urls = ["http://google.com/","http://facebook.com"]
     ## Open ARTISTS_LIST as a list called artists
 
 
@@ -45,9 +57,9 @@ for plant in plants :
     ## Open each url and add to one string HTMLOfPages
     HTMLOfPages = ""
     for url in urls :
-        html = search.getPageText(url, verbose=True, timeout=.3)
+        html = search.getPageText(url, verbose=True, timeout=3)
         HTMLOfPages += html
-
+    print()
     # There is an artist named "Erro" and he get's matched for every single
     # "error" in the site text. Since no artist has "error" in their name
     # we can safely get rid of "error" strings without messing up the results.
@@ -64,4 +76,9 @@ for plant in plants :
         counter.append(count)
 
     #search.printOccurrences(counter, artists)
-    search.resultsToCsv(counter, artists, plant, RESULTS_CSV)
+    search.resultsToCsv(counter, artists, plant, results_file)
+    plantFinishTime = time.time()
+    plantElapsedTime = (plantFinishTime - plantStartTime)
+    totalElapsedTime = (plantFinishTime - startTime)
+    print("Successfully added " + plant + " to results file in " + search.formatSeconds(plantElapsedTime) + ".")
+    print("Total elapsed time: " + search.formatSeconds(totalElapsedTime))

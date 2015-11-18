@@ -4,10 +4,29 @@ Take those top results and search each page for the occurrences of each
 artist. Keep track of how many times those artist's names occur for all
 of the pages.
 """
-import json, urllib, sys, re, socket, csv, time, argparse, http
+import json, urllib, sys, re, socket, csv, time, argparse, http.client
 from urllib import request
 from bs4 import BeautifulSoup
 
+def formatSeconds(sec) :
+    m, s = divmod(sec, 60)
+    h, m = divmod(m, 60)
+    secStr = addS("second", "seconds", s)
+    minStr = addS("minute", "minutes", m)
+    hrStr = addS("hour", "hours", h)
+    if h < 1.0 :
+        if m < 1.0 :
+            return format("%d %s" % (s, secStr))
+        else :
+            return format("%d %s %d %s" % (m, minStr, s, secStr))
+    else :
+        return format("%d %s %d %s %d %s" % (h, hrStr, m, minStr, s, secStr))
+
+def addS(sing, plur, aNum) :
+    if aNum >= 1.0 and aNum < 2.0 :
+        return sing
+    else:
+        return plur
 
 availableEngines = ["google", "duckduckgo"]
 
@@ -16,36 +35,39 @@ def getUrls(query, engine = "google", startValue = 0, verbose=False) :
       Get's the urls from a given search engine for a query
     """
     query = query.replace(" ", "+")
-    try:
-        if engine == "google" : # Google Search API (Depreciated)
-            url = "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=large&q="+ query +"&start=" + str(startValue)
-            if verbose :
-                print("Search query: ", url)
-            time.sleep(5)
-            req = urllib.request.urlopen(url)
-            reqtxt = req.read().decode(req.info().get_param('charset') or 'utf-8')
-            rJson = json.loads(reqtxt)
-            urls = []
-            for result in rJson["responseData"]["results"] :
-                urls.append(result["unescapedUrl"])
-            return urls
+    if engine == "google" : # Google Search API (Depreciated)
+        url = "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=large&q="+ query +"&start=" + str(startValue)
+        if verbose :
+            print("Search query: ", url)
+        time.sleep(5)
+        req = urllib.request.urlopen(url)
+        reqtxt = req.read().decode(req.info().get_param('charset') or 'utf-8')
+        rJson = json.loads(reqtxt)
+        urls = []
+        for result in rJson["responseData"]["results"] :
+            urls.append(result["unescapedUrl"])
+        return urls
 
-        elif engine == "duckduckgo" : # DuckDuckGo parsing
-            url = "http://duckduckgo.com/html/?q=" + query
-            if verbose :
-                print("Search query: ", url)
-            data = urllib.request.urlopen(url)
-            parsed = BeautifulSoup(data, "html.parser")
-            urls = []
-            for i in parsed.findAll('div', {'class': re.compile('links_main*')}):
-                urls.append(i.a['href'])
-            return urls
-        else:
-            print("Invalid engine. Quitting...")
-            exit()
-    except (urllib.error.HTTPError, ValueError) :
-        print("The query you entered is not valid. Quitting...")
+    elif engine == "duckduckgo" : # DuckDuckGo parsing
+        url = "http://duckduckgo.com/html/?q=" + query
+        if verbose :
+            print("Search query: ", url)
+        data = urllib.request.urlopen(url)
+        parsed = BeautifulSoup(data, "html.parser")
+        urls = []
+        for i in parsed.findAll('div', {'class': re.compile('links_main*')}):
+            urls.append(i.a['href'])
+        return urls
+    else:
+        print("Invalid engine. Quitting...")
         exit()
+
+def oneLinePrint(printStr, lines=60) :
+    sys.stdout.flush()
+    for x in range(0, lines) :
+        sys.stdout.write(" ")
+    sys.stdout.write('\r')
+    sys.stdout.write((printStr[:lines-1] + '..') if len(printStr) > lines-1 else printStr)
 
 def getPageText(url, verbose=False, timeout=10) :
     """
@@ -54,19 +76,22 @@ def getPageText(url, verbose=False, timeout=10) :
     try :
         if verbose :
             printurl = (url[:75] + '..') if len(url) > 75 else url
-            print("Searching... ", printurl)
+            oneLinePrint("Searching... " + url, 75)
         html = urllib.request.urlopen(url, timeout=timeout).read()
-        soup = BeautifulSoup(html, "html.parser")
-        texts = soup.findAll(text=True)
-        paragraphs = ""
-        for x in texts:
-            paragraphs += str(x)
-        return paragraphs
+        return getVisibleText(html)
     except (socket.timeout, ConnectionRefusedError, urllib.error.URLError,
-            ValueError, http.client.BadStatusLine) :
+            ValueError, http.client.BadStatusLine, http.client.IncompleteRead) :
         if verbose :
-            print("Couldn't get: ", url)
+            oneLinePrint("Couldn't get: " + url, 75)
         return " "
+
+def getVisibleText(readUrl) :
+    soup = BeautifulSoup(readUrl, "html.parser")
+    texts = soup.findAll(text=True)
+    paragraphs = ""
+    for x in texts:
+        paragraphs += str(x)
+    return paragraphs
 
 def printOccurrences(counter, artists) :
     ## The maximum number of occurrences of any given name
@@ -89,14 +114,7 @@ def printOccurrences(counter, artists) :
                         print(" - Artist: ", artists[x])
                         #print("Index: ", x)
 
-def resultsToCsv(counter, artists, plant_string, results_csv) :
-    # Open the results_csv file
-    try:
-        results_file = open(results_csv, 'a')
-    except FileNotFoundError :
-        print("The plants file is not found. Quitting...")
-        exit()
-
+def resultsToCsv(counter, artists, plant_string, results_file) :
     # Format the data
     results = [plant_string]
 
