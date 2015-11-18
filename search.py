@@ -69,8 +69,6 @@ def getPageText(url, verbose=False, timeout=10) :
         return " "
 
 def printOccurrences(counter, artists) :
-
-
     ## The maximum number of occurrences of any given name
     maxOccurrences = max(counter)
     if maxOccurrences is 0 :

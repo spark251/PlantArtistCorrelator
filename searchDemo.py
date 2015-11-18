@@ -1,6 +1,5 @@
 import json, urllib, sys, re, socket, csv, time, argparse, http, search
 
-
 if __name__ == '__main__':
     helpText = """
     Takes a search query and searches google for the top results.
