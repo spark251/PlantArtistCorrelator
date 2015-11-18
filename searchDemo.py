@@ -33,8 +33,14 @@ if __name__ == '__main__':
     if args.verbose is False :
          sys.stdout.write('\rLoading... ')
 
-    urls = search.getUrls(args.query, args.engine, verbose=args.verbose)
+    url1 = search.getUrls(args.query, "google", verbose=args.verbose)
+    url2 = search.getUrls(args.query, "duckduckgo", verbose=args.verbose)
 
+    in_first = set(url1)
+    in_second = set(url2)
+    in_second_but_not_in_first = in_second - in_first
+
+    urls = url1 + list(in_second_but_not_in_first)
     ## Open ARTISTS_LIST as a list called artists
     try:
         artists_list = args.csv
@@ -76,7 +82,7 @@ if __name__ == '__main__':
     for index, artist in enumerate(artists, start=0):
         count = HTMLOfPages.count(artist.lower())
         counter.append(count)
-
+    #print(len(counter))
     ## The maximum number of occurrences of any given name
     maxOccurrences = max(counter)
 

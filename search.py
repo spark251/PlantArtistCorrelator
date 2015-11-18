@@ -21,7 +21,7 @@ def getUrls(query, engine = "google", startValue = 0, verbose=False) :
             url = "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=large&q="+ query +"&start=" + str(startValue)
             if verbose :
                 print("Search query: ", url)
-            time.sleep(15)
+            time.sleep(5)
             req = urllib.request.urlopen(url)
             reqtxt = req.read().decode(req.info().get_param('charset') or 'utf-8')
             rJson = json.loads(reqtxt)
