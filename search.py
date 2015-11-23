@@ -114,13 +114,15 @@ def printOccurrences(counter, artists) :
                         print(" - Artist: ", artists[x])
                         #print("Index: ", x)
 
-def resultsToCsv(counter, artists, plant_string, results_file) :
+def resultsToCsv(counter, artists, query, plant_string, results_file) :
     # Format the data
     results = [plant_string]
 
+    firstRun = True
+
     ## The maximum number of occurrences of any given name
     maxOccurrences = max(counter)
-    if maxOccurrences is 0 :
+    if maxOccurrences <= 3 :
         results.append("No results");
     else :
         ## Print out all the artists that matched the search
@@ -129,7 +131,11 @@ def resultsToCsv(counter, artists, plant_string, results_file) :
             theIndexes = [i for i, x in enumerate(counter) if x == occurrences]
             if len(theIndexes) != 0 :
                 for x in theIndexes :
-                    results.append(artists[x] + " (" + str(occurrences) + ")")
+                    if firstRun :
+                        results.append(query + " " + artists[x])
+                        firstRun = False
+                    if occurrences > 3 :
+                        results.append(artists[x] + " (" + str(occurrences) + ")")
 
     # Write data to file in a new row in csv format
     resultString = ""

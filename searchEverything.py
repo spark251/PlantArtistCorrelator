@@ -36,7 +36,9 @@ except FileNotFoundError :
 for index, plant in enumerate(plants) :
     plantStartTime = time.time()
 
-    query = plant + " art artist painting"
+    queryAdd = " art artist painting"
+
+    query = plant + queryAdd
     print(index+1, "out of", len(plants), ":", plant)
 
     url1 = search.getUrls(query, "google", verbose=True)
@@ -76,7 +78,7 @@ for index, plant in enumerate(plants) :
         counter.append(count)
 
     #search.printOccurrences(counter, artists)
-    search.resultsToCsv(counter, artists, plant, results_file)
+    search.resultsToCsv(counter, artists, query, plant, results_file)
     plantFinishTime = time.time()
     plantElapsedTime = (plantFinishTime - plantStartTime)
     totalElapsedTime = (plantFinishTime - startTime)
