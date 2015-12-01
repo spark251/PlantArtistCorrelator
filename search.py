@@ -79,8 +79,9 @@ def getPageText(url, verbose=False, timeout=10) :
             oneLinePrint("Searching... " + url, 75)
         html = urllib.request.urlopen(url, timeout=timeout).read()
         return getVisibleText(html)
-    except (socket.timeout, ConnectionRefusedError, urllib.error.URLError,
-            ValueError, http.client.BadStatusLine, http.client.IncompleteRead) :
+    except (KeyboardInterrupt, SystemExit):
+        raise
+    except Exception:
         if verbose :
             oneLinePrint("Couldn't get: " + url, 75)
         return " "
