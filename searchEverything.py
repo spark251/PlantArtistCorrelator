@@ -38,10 +38,11 @@ except FileNotFoundError :
 
 for index, plant in enumerate(plants) :
     plantStartTime = time.time() # Start time for execution of script for current plant
+    timeIndex = index
 
     # The search query used
     queryAdd = " art artist painting"
-    query = plant + queryAdd
+    query = "\"" + plant + "\"" + queryAdd
 
     # Prints: "1 out of 427 : PLANT_NAME"
     print(index+1, "out of", len(plants), ":", plant)
@@ -84,5 +85,7 @@ for index, plant in enumerate(plants) :
     totalElapsedTime = (plantFinishTime - startTime)
     print("Successfully added " + plant + " to results file in " + search.formatSeconds(plantElapsedTime) + ".")
     print("Total elapsed time: " + search.formatSeconds(totalElapsedTime))
+    
+    print("Average time per plant: " + search.formatSeconds(totalElapsedTime/(timeIndex+1)))
     print("------------------------")
     print("")
