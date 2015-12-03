@@ -34,33 +34,41 @@ def getUrls(query, engine = "google", startValue = 0, verbose=False) :
     """
       Get's the urls from a given search engine for a query
     """
-    query = query.replace(" ", "+")
-    if engine == "google" : # Google Search API (Depreciated)
-        url = "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=large&q="+ query +"&start=" + str(startValue)
-        if verbose :
-            print("Search query: ", url)
-        time.sleep(5)
-        req = urllib.request.urlopen(url)
-        reqtxt = req.read().decode(req.info().get_param('charset') or 'utf-8')
-        rJson = json.loads(reqtxt)
-        urls = []
-        for result in rJson["responseData"]["results"] :
-            urls.append(result["unescapedUrl"])
-        return urls
+    try:
+        query = query.replace(" ", "+")
+        if engine == "google" : # Google Search API (Depreciated)
+            url = "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=large&q="+ query +"&start=" + str(startValue)
+            if verbose :
+                print("Search query: ", url)
+            time.sleep(5)
+            req = urllib.request.urlopen(url)
+            reqtxt = req.read().decode(req.info().get_param('charset') or 'utf-8')
+            rJson = json.loads(reqtxt)
+            urls = []
+            for result in rJson["responseData"]["results"] :
+                urls.append(result["unescapedUrl"])
+            return urls
 
-    elif engine == "duckduckgo" : # DuckDuckGo parsing
-        url = "http://duckduckgo.com/html/?q=" + query
+        elif engine == "duckduckgo" : # DuckDuckGo parsing
+            url = "http://duckduckgo.com/html/?q=" + query
+            if verbose :
+                print("Search query: ", url)
+            data = urllib.request.urlopen(url)
+            parsed = BeautifulSoup(data, "html.parser")
+            urls = []
+            for i in parsed.findAll('div', {'class': re.compile('links_main*')}):
+                urls.append(i.a['href'])
+            return urls
+        else:
+            print("Invalid engine. Quitting...")
+            return []
+    except (KeyboardInterrupt, SystemExit):
+        raise
+    except Exception:
         if verbose :
-            print("Search query: ", url)
-        data = urllib.request.urlopen(url)
-        parsed = BeautifulSoup(data, "html.parser")
-        urls = []
-        for i in parsed.findAll('div', {'class': re.compile('links_main*')}):
-            urls.append(i.a['href'])
-        return urls
-    else:
-        print("Invalid engine. Quitting...")
-        exit()
+            oneLinePrint("Couldn't get: " + url, 75)
+        return []
+
 
 def oneLinePrint(printStr, lines=60) :
     sys.stdout.flush()
