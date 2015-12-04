@@ -63,7 +63,7 @@ def getUrls(query, engine = "google", startValue = 0, verbose=False) :
     """
     try:
         query = query.replace(" ", "+")
-        if engine == "google" : # Google Search API (Depreciated, we must pray that it works)
+        if engine == "google" : # Google Search API (Deprecated, we must pray that it works)
             url = "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=large&q="+ query +"&start=" + str(startValue)
             if verbose :
                 print("Search query: ", url)
